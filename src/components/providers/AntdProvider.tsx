@@ -4,7 +4,7 @@ import { ConfigProvider, theme, App } from 'antd';
 import { useAppSelector, useAppDispatch } from '@/lib/redux/hooks';
 import { useEffect, useState } from 'react';
 import { setTheme } from '@/lib/redux/slices/uiSlice';
-import { getStoredTheme, applyTheme } from '@/utils/theme';
+import { getStoredTheme, applyTheme, getEffectiveTheme, watchSystemTheme } from '@/utils/theme';
 import { loadCustomTheme, applyCustomThemeColors } from '@/utils/customTheme';
 import { loadSavedTheme } from '@/lib/redux/slices/themeGeneratorSlice';
 import { hexToRgba } from '@/lib/utils/colorUtils';
@@ -43,8 +43,21 @@ export default function AntdProvider({
     }
   }, [currentTheme, mounted]);
 
+  // Watch system theme changes if theme is set to 'system'
+  useEffect(() => {
+    if (!mounted || currentTheme !== 'system') return;
+    
+    const unwatch = watchSystemTheme(() => {
+      // Re-apply theme when system preference changes
+      applyTheme(currentTheme);
+    });
+    
+    return unwatch;
+  }, [currentTheme, mounted]);
+
   // Use default theme during SSR to prevent hydration mismatch
-  const themeToUse = mounted ? currentTheme : 'light';
+  // Get effective theme (resolves 'system' to actual light/dark)
+  const themeToUse = mounted ? getEffectiveTheme(currentTheme) : 'light';
 
   // Only use custom primary color for main elements (header, sidebar, button)
   // Keep other colors (text, background) using default theme

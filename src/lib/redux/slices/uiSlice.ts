@@ -1,9 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { setStoredTheme, applyTheme } from '@/utils/theme';
+import { setStoredTheme, applyTheme, getSystemTheme } from '@/utils/theme';
+
+export type ThemeMode = 'light' | 'dark' | 'system';
 
 interface UiState {
   sidebarCollapsed: boolean;
-  theme: 'light' | 'dark';
+  theme: ThemeMode;
   loading: boolean;
   loadingMessage?: string;
 }
@@ -12,7 +14,7 @@ interface UiState {
 // Theme will be updated on client-side after hydration
 const initialState: UiState = {
   sidebarCollapsed: false,
-  theme: 'light',
+  theme: 'system',
   loading: false,
   loadingMessage: undefined,
 };
@@ -27,16 +29,22 @@ const uiSlice = createSlice({
     setSidebarCollapsed: (state, action: PayloadAction<boolean>) => {
       state.sidebarCollapsed = action.payload;
     },
-    setTheme: (state, action: PayloadAction<'light' | 'dark'>) => {
+    setTheme: (state, action: PayloadAction<ThemeMode>) => {
       state.theme = action.payload;
       setStoredTheme(action.payload);
       applyTheme(action.payload);
     },
     toggleTheme: (state) => {
-      const newTheme = state.theme === 'light' ? 'dark' : 'light';
-      state.theme = newTheme;
-      setStoredTheme(newTheme);
-      applyTheme(newTheme);
+      // Cycle through: system -> light -> dark -> system
+      if (state.theme === 'system') {
+        state.theme = 'light';
+      } else if (state.theme === 'light') {
+        state.theme = 'dark';
+      } else {
+        state.theme = 'system';
+      }
+      setStoredTheme(state.theme);
+      applyTheme(state.theme);
     },
     setLoading: (state, action: PayloadAction<{ loading: boolean; message?: string }>) => {
       state.loading = action.payload.loading;

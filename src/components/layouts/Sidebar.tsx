@@ -11,8 +11,9 @@ import {
 } from '@ant-design/icons';
 import { useAppSelector, useAppDispatch } from '@/lib/redux/hooks';
 import { toggleSidebar } from '@/lib/redux/slices/uiSlice';
+import { getEffectiveTheme } from '@/utils/theme';
 import { getLuminance } from '@/lib/utils/colorUtils';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const { Sider } = Layout;
 
@@ -43,10 +44,13 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { sidebarCollapsed, theme } = useAppSelector((state) => state.ui);
+  const { sidebarCollapsed, theme: themeMode } = useAppSelector((state) => state.ui);
   const { isCustomThemeActive, colors: customColors } = useAppSelector(
     (state) => state.themeGenerator
   );
+  
+  // Get effective theme (resolves 'system' to actual light/dark)
+  const theme = getEffectiveTheme(themeMode);
   const isDark = theme === 'dark';
 
   // Use custom primary color for sidebar background if custom theme is active
@@ -95,7 +99,7 @@ export default function Sidebar() {
         }}
       >
       <div 
-        className={`flex items-center justify-between p-4 h-16 border-b ${
+        className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} p-4 h-16 border-b ${
           isCustomThemeActive 
             ? (getLuminance(customColors.primary) > 0.5 ? 'border-gray-200' : 'border-gray-700')
             : (isLightBg ? 'border-gray-200' : 'border-gray-700')
@@ -106,11 +110,23 @@ export default function Sidebar() {
             : (isLightBg ? 'transparent' : 'transparent'),
         }}
       >
-        {!sidebarCollapsed && (
-          <h1 className={`text-lg font-bold m-0 ${getTextColorStyle()}`}>
-            Admin Panel
-          </h1>
-        )}
+        <AnimatePresence mode="wait">
+          {!sidebarCollapsed && (
+            <motion.h1
+              key="admin-panel-title"
+              initial={{ opacity: 0, x: -10, scale: 0.9 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: -10, scale: 0.9 }}
+              transition={{ 
+                duration: 0.25,
+                ease: [0.4, 0, 0.2, 1]
+              }}
+              className={`text-lg font-bold m-0 ${getTextColorStyle()} shrink-0`}
+            >
+              Admin Panel
+            </motion.h1>
+          )}
+        </AnimatePresence>
         <button
           onClick={() => dispatch(toggleSidebar())}
           className={`p-2 rounded transition-colors ${

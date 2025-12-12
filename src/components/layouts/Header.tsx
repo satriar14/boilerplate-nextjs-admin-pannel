@@ -1,29 +1,88 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { Layout, Switch, Dropdown, Avatar, Space } from "antd";
+import { useRouter, usePathname } from "next/navigation";
+import { Layout, Switch, Dropdown, Avatar, Space, Segmented, Breadcrumb } from "antd";
 import {
   LogoutOutlined,
   UserOutlined,
   MoonOutlined,
   SunOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { useAppSelector, useAppDispatch } from "@/lib/redux/hooks";
 import { logout } from "@/lib/redux/slices/authSlice";
-import { toggleTheme } from "@/lib/redux/slices/uiSlice";
+import { setTheme, toggleTheme } from "@/lib/redux/slices/uiSlice";
+import { getEffectiveTheme } from "@/utils/theme";
 import { getLuminance } from "@/lib/utils/colorUtils";
+import { FaLaptop } from "react-icons/fa";
 
 const { Header: AntHeader } = Layout;
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { theme } = useAppSelector((state) => state.ui);
+  const { theme: themeMode } = useAppSelector((state) => state.ui);
   const { isCustomThemeActive, colors: customColors } = useAppSelector(
     (state) => state.themeGenerator
   );
+  
+  // Get effective theme (resolves 'system' to actual light/dark)
+  const theme = getEffectiveTheme(themeMode);
+
+  // Generate breadcrumb items from pathname
+  const getBreadcrumbItems = () => {
+    if (!pathname) return [];
+    
+    const pathSegments = pathname.split('/').filter(Boolean);
+    const items = [
+      {
+        title: (
+          <a 
+            href="/dashboard" 
+            onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }}
+            style={{ color: getTextColor(), opacity: 0.7 }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.7'; }}
+          >
+            <HomeOutlined /> Home
+          </a>
+        ),
+      },
+    ];
+
+    let currentPath = '';
+    pathSegments.forEach((segment, index) => {
+      currentPath += `/${segment}`;
+      const isLast = index === pathSegments.length - 1;
+      
+      // Format segment name
+      const segmentName = segment
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+      items.push({
+        title: isLast ? (
+          <span style={{ color: getTextColor() }}>{segmentName}</span>
+        ) : (
+          <a 
+            href={currentPath} 
+            onClick={(e) => { e.preventDefault(); router.push(currentPath); }}
+            style={{ color: getTextColor(), opacity: 0.7 }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.7'; }}
+          >
+            {segmentName}
+          </a>
+        ),
+      });
+    });
+
+    return items;
+  };
 
   // Use custom primary color for header background if custom theme is active
   const headerBg = isCustomThemeActive 
@@ -49,6 +108,54 @@ export default function Header() {
 
   const userMenuItems: MenuProps["items"] = [
     {
+      key: "theme",
+      label: (
+        <div 
+          className="w-full"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Segmented
+            value={themeMode}
+            onChange={(value) => dispatch(setTheme(value as "light" | "dark" | "system"))}
+            options={[
+              {
+                label: (
+                  <div className="flex items-center gap-1 px-1">
+                    <SunOutlined />
+                    <span className="hidden sm:inline">Light</span>
+                  </div>
+                ),
+                value: "light",
+              },
+              {
+                label: (
+                  <div className="flex items-center gap-1 px-1">
+                    <MoonOutlined />
+                    <span className="hidden sm:inline">Dark</span>
+                  </div>
+                ),
+                value: "dark",
+              },
+              {
+                label: (
+                  <div className="flex items-center gap-1 px-1">
+                    <FaLaptop />
+                    <span className="hidden sm:inline">System</span>
+                  </div>
+                ),
+                value: "system",
+              },
+            ]}
+            size="small"
+            className="w-full"
+          />
+        </div>
+      ),
+    },
+    {
+      type: "divider",
+    },
+    {
       key: "profile",
       icon: <UserOutlined />,
       label: "Profile",
@@ -68,6 +175,9 @@ export default function Header() {
     },
   ];
 
+  // Don't show breadcrumb on auth pages
+  const showBreadcrumb = pathname && !pathname.startsWith('/auth');
+
   return (
     <AntHeader
       className="border-b border-gray-200 dark:border-gray-700 px-6 flex items-center justify-between shadow-sm backdrop-blur-sm"
@@ -78,18 +188,17 @@ export default function Header() {
         backgroundColor: headerBg,
         color: getTextColor(),
       }}>
-      <div className="flex-1" />
+      {showBreadcrumb && (
+        <Breadcrumb
+          items={getBreadcrumbItems()}
+          className="flex-1"
+          style={{
+            color: getTextColor(),
+          }}
+        />
+      )}
+      {!showBreadcrumb && <div className="flex-1" />}
       <Space size="middle" align="center">
-        <Space size="small" align="center">
-          <Switch
-            checked={theme === "dark"}
-            onChange={() => dispatch(toggleTheme())}
-            checkedChildren={<MoonOutlined />}
-            unCheckedChildren={<SunOutlined />}
-            size="default"
-          />
-          
-        </Space>
         <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
           <Space className="cursor-pointer">
             <Avatar icon={<UserOutlined />} />

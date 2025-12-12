@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Layout, Spin } from 'antd';
 import { useAppSelector } from '@/lib/redux/hooks';
+import { getEffectiveTheme } from '@/utils/theme';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import LoadingSpinner from '../ui/LoadingSpinner';
@@ -18,12 +19,15 @@ export default function ProtectedLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { isAuthenticated, token } = useAppSelector((state) => state.auth);
-  const { sidebarCollapsed, theme } = useAppSelector((state) => state.ui);
+  const { sidebarCollapsed, theme: themeMode } = useAppSelector((state) => state.ui);
   const { isCustomThemeActive, colors: customColors } = useAppSelector(
     (state) => state.themeGenerator
   );
   const [isChecking, setIsChecking] = useState(true);
   const [mounted, setMounted] = useState(false);
+  
+  // Get effective theme (resolves 'system' to actual light/dark)
+  const theme = getEffectiveTheme(themeMode);
 
   // User is loaded in ClientInit component
 
@@ -59,6 +63,29 @@ export default function ProtectedLayout({
 
   // Don't render protected layout for auth pages
   if (pathname?.startsWith('/auth')) {
+    return <>{children}</>;
+  }
+
+  // Don't render protected layout for not-found page
+  // Define all valid routes in the application (exact matches only, no sub-routes)
+  const validExactRoutes = [
+    '/dashboard',
+    '/users',
+    '/settings',
+    '/settings/theme',
+  ];
+  
+  // Check if current pathname is a valid exact route
+  const isValidExactRoute = pathname && validExactRoutes.includes(pathname);
+  
+  // Root route (/) redirects to dashboard, so we allow it but it will redirect
+  const isRootRoute = pathname === '/';
+  
+  // If pathname exists but is not a valid exact route and not root and not auth, it's 404
+  // Render children without ProtectedLayout (this will show not-found page)
+  // Only check after mounted to avoid SSR issues
+  if (mounted && pathname && !isValidExactRoute && !isRootRoute && !pathname.startsWith('/auth')) {
+    // This is a 404 - render without layout
     return <>{children}</>;
   }
 

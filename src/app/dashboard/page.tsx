@@ -1,6 +1,8 @@
 'use client';
 
-import { Card, Row, Col, Statistic, Typography, Table, Tag } from 'antd';
+import { useState, useEffect } from 'react';
+import { Card, Row, Col, Statistic, Typography, Tag } from 'antd';
+import DataTable from '@/components/ui/DataTable';
 import {
   UserOutlined,
   TeamOutlined,
@@ -8,6 +10,7 @@ import {
   ClockCircleOutlined,
 } from '@ant-design/icons';
 import { useAppSelector } from '@/lib/redux/hooks';
+import { getEffectiveTheme } from '@/utils/theme';
 import dayjs from 'dayjs';
 import PageTransition from '@/components/animations/PageTransition';
 import StaggerContainer from '@/components/animations/StaggerContainer';
@@ -17,7 +20,19 @@ const { Title } = Typography;
 
 export default function DashboardPage() {
   const { user } = useAppSelector((state) => state.auth);
-  const { theme } = useAppSelector((state) => state.ui);
+  const { theme: themeMode } = useAppSelector((state) => state.ui);
+  const theme = getEffectiveTheme(themeMode);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkSize();
+    window.addEventListener('resize', checkSize);
+    return () => window.removeEventListener('resize', checkSize);
+  }, []);
 
   // Mock data for recent activities
   const recentActivities = [
@@ -49,16 +64,19 @@ export default function DashboardPage() {
       title: 'Action',
       dataIndex: 'action',
       key: 'action',
+      ellipsis: true,
     },
     {
       title: 'User',
       dataIndex: 'user',
       key: 'user',
+      ellipsis: true,
     },
     {
       title: 'Time',
       dataIndex: 'time',
       key: 'time',
+      className: isMobile ? 'hidden' : '', // Hide on mobile
     },
     {
       title: 'Status',
@@ -143,14 +161,17 @@ export default function DashboardPage() {
           </Row>
 
           <StaggerItem>
-            <Card title="Recent Activities" className="mt-6">
-        <Table
-          dataSource={recentActivities}
-          columns={columns}
-          pagination={false}
-          size="middle"
-        />
-          </Card>
+            <DataTable
+              columns={columns}
+              dataSource={recentActivities}
+              pagination={false}
+              showColumnVisibility={true}
+              showSearch={true}
+              searchableColumns={["action", "user"]}
+              searchPlaceholder="Search activities..."
+              title="Recent Activities"
+              className="mt-6"
+            />
           </StaggerItem>
         </StaggerContainer>
       </div>
