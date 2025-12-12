@@ -129,7 +129,7 @@ export default function Sidebar() {
         </AnimatePresence>
         <button
           onClick={() => dispatch(toggleSidebar())}
-          className={`p-2 rounded transition-colors ${
+          className={`p-2 rounded transition-colors cursor-pointer ${
             isLightBg
               ? 'text-gray-700 hover:bg-gray-100'
               : 'text-white hover:bg-gray-700'
