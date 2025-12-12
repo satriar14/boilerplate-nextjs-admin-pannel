@@ -99,3 +99,72 @@ html.dark body {
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+/* SweetAlert2 Custom Styles */
+.dark-swal {
+  background-color: #1f1f1f !important;
+  color: #ffffff !important;
+}
+
+.light-swal {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+.dark-swal .swal2-title {
+  color: #ffffff !important;
+}
+
+.light-swal .swal2-title {
+  color: #111827 !important;
+}
+
+.dark-swal .swal2-content {
+  color: #d1d5db !important;
+}
+
+.light-swal .swal2-content {
+  color: #4b5563 !important;
+}
+
+.dark-swal .swal2-confirm {
+  background-color: #ef4444 !important;
+  border-color: #ef4444 !important;
+}
+
+.dark-swal .swal2-confirm:hover {
+  background-color: #dc2626 !important;
+  border-color: #dc2626 !important;
+}
+
+.light-swal .swal2-confirm {
+  background-color: #dc2626 !important;
+  border-color: #dc2626 !important;
+}
+
+.light-swal .swal2-confirm:hover {
+  background-color: #b91c1c !important;
+  border-color: #b91c1c !important;
+}
+
+.dark-swal .swal2-cancel {
+  background-color: #6b7280 !important;
+  border-color: #6b7280 !important;
+  color: #ffffff !important;
+}
+
+.dark-swal .swal2-cancel:hover {
+  background-color: #4b5563 !important;
+  border-color: #4b5563 !important;
+}
+
+.light-swal .swal2-cancel {
+  background-color: #9ca3af !important;
+  border-color: #9ca3af !important;
+  color: #ffffff !important;
+}
+
+.light-swal .swal2-cancel:hover {
+  background-color: #6b7280 !important;
+  border-color: #6b7280 !important;
+}

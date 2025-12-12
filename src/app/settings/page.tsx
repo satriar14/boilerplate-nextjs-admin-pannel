@@ -9,8 +9,9 @@ import { getEffectiveTheme } from '@/utils/theme';
 import PageTransition from '@/components/animations/PageTransition';
 import StaggerContainer from '@/components/animations/StaggerContainer';
 import StaggerItem from '@/components/animations/StaggerItem';
+import PageTitle from '@/components/ui/PageTitle';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export default function SettingsPage() {
   const dispatch = useAppDispatch();
@@ -20,12 +21,7 @@ export default function SettingsPage() {
   return (
     <PageTransition>
       <div>
-        <Title 
-          level={2} 
-          className="text-gray-900 dark:text-gray-100"
-        >
-          Settings
-        </Title>
+        <PageTitle>Settings</PageTitle>
 
         <StaggerContainer>
           <StaggerItem>

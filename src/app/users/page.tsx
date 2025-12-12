@@ -9,14 +9,10 @@ import {
   Input,
   Select,
   App,
-  Popconfirm,
-  Typography,
   Tooltip,
 } from "antd";
 import {
-  PlusOutlined,
   EditOutlined,
-  DeleteOutlined,
 } from "@ant-design/icons";
 import DataTable from "@/components/ui/DataTable";
 import type { ColumnsType } from "antd/es/table";
@@ -31,8 +27,10 @@ import {
 } from "@/lib/api/users";
 import dayjs from "dayjs";
 import PageTransition from "@/components/animations/PageTransition";
+import PageTitle from "@/components/ui/PageTitle";
+import DeleteButton from "@/components/ui/DeleteButton";
+import AddButton from "@/components/ui/AddButton";
 
-const { Title } = Typography;
 const { Option } = Select;
 
 export default function UsersPage() {
@@ -119,16 +117,7 @@ export default function UsersPage() {
   };
 
   const handleDelete = async (id: string) => {
-    try {
-      dispatch(setLoading({ loading: true, message: "Deleting user..." }));
-      await usersApi.delete(id);
-      dispatch(setLoading({ loading: false }));
-      message.success("User deleted successfully");
-      fetchUsers();
-    } catch (error: any) {
-      dispatch(setLoading({ loading: false }));
-      message.error("Failed to delete user");
-    }
+    await usersApi.delete(id);
   };
 
   const handleSubmit = async (values: CreateUserData | UpdateUserData) => {
@@ -206,20 +195,15 @@ export default function UsersPage() {
               onClick={() => handleEdit(record)}
             />
           </Tooltip>
-          <Popconfirm
-            title="Are you sure you want to delete this user?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No">
-            <Tooltip title="Delete">
-              <Button
-                type="primary"
-                danger
-                icon={<DeleteOutlined />}
-                size="small"
-              />
-            </Tooltip>
-          </Popconfirm>
+          <DeleteButton
+            itemId={record.id}
+            itemName={record.name}
+            onDelete={handleDelete}
+            onSuccess={fetchUsers}
+            title="Delete User?"
+            text={`Are you sure you want to delete ${record.name}? This action cannot be undone.`}
+            loadingMessage="Deleting user..."
+          />
         </Space>
       ),
     },
@@ -251,18 +235,13 @@ export default function UsersPage() {
     <PageTransition>
       <div>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <Title level={2} className="text-gray-900 dark:text-gray-100 m-0">
-            Users Management
-          </Title>
+          <PageTitle>Users Management</PageTitle>
           <Space className="flex-wrap">
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
+            <AddButton
               onClick={handleCreate}
-              className="w-full sm:w-auto">
-              <span className="hidden sm:inline">Add User</span>
-              <span className="sm:hidden">Add</span>
-            </Button>
+              text="Add User"
+              shortText="Add"
+            />
           </Space>
         </div>
 

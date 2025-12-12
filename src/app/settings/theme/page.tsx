@@ -32,8 +32,9 @@ import { getContrastRatio, meetsContrastAA } from "@/lib/utils/colorUtils";
 import LivePreview from "@/components/theme-generator/LivePreview";
 import ContrastChecker from "@/components/theme-generator/ContrastChecker";
 import PageTransition from "@/components/animations/PageTransition";
+import PageTitle from "@/components/ui/PageTitle";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Option } = Select;
 
 export default function ThemeGeneratorPage() {
@@ -98,9 +99,7 @@ export default function ThemeGeneratorPage() {
     <PageTransition>
       <div>
         <div className="flex justify-between items-center mb-6">
-          <Title level={2} className="text-gray-900 dark:text-gray-100">
-            Dynamic Theme Generator
-          </Title>
+          <PageTitle>Dynamic Theme Generator</PageTitle>
           <Space>
             <Button
               icon={<ReloadOutlined />}

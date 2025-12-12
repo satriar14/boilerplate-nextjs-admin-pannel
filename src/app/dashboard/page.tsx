@@ -15,8 +15,7 @@ import dayjs from 'dayjs';
 import PageTransition from '@/components/animations/PageTransition';
 import StaggerContainer from '@/components/animations/StaggerContainer';
 import StaggerItem from '@/components/animations/StaggerItem';
-
-const { Title } = Typography;
+import PageTitle from '@/components/ui/PageTitle';
 
 export default function DashboardPage() {
   const { user } = useAppSelector((state) => state.auth);
@@ -93,12 +92,7 @@ export default function DashboardPage() {
   return (
     <PageTransition>
       <div>
-        <Title 
-          level={2} 
-          className="text-gray-900 dark:text-gray-100"
-        >
-          Dashboard
-        </Title>
+        <PageTitle>Dashboard</PageTitle>
         <p 
           className="text-gray-900 dark:text-gray-300 mb-6"
           style={{
